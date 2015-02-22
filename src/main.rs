@@ -79,9 +79,11 @@ fn cd(command: Vec<&str>) {
     }
     let directory = dir.unwrap();
     let result = env::set_current_dir(&directory);
-    if result.is_err() {
-        println_stderr!("cd: unable to change directory to {}",
-                        directory.display());
+    match result {
+        Err(err) => {
+            println_stderr!("cd: {}: {}", directory.display(), err);
+        },
+        _ => (),
     }
 }
 
