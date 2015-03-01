@@ -67,12 +67,11 @@ fn cd(command: Vec<&str>) {
     // cd is the "change directory" command. It can take either 0 or 1
     // arguments. If given no arguments, then the $HOME directory is
     // chosen.
-    let mut dir: Option<Path>;
-    match command.len() {
+    let dir: Option<Path> = match command.len() {
         0 => panic!("invalid cd invocation"),
-        1 => dir = env::home_dir(),
-        _ => dir = Some(Path::new(command[1]))
-    }
+        1 => env::home_dir(),
+        _ => Some(Path::new(command[1]))
+    };
     if dir.is_none() {
         println_stderr!("cd: no directory to change to");
         return;
