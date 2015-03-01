@@ -39,31 +39,31 @@ fn shell_loop() {
         print!("$ ");
         let line = stdin.read_line();
         match line {
-            Ok(expr) => handle_command(expr),
+            Ok(expr) => handle_command(&expr),
             Err(_) => break,
         }
     }
 }
 
-fn handle_command(user_expr: String) {
+fn handle_command(user_expr: &str) {
     // Clean up the string by removing the newline at the end
-    let expr = &user_expr.trim_matches('\n');
+    let expr = user_expr.trim_matches('\n');
     let components: Vec<&str> = expr.split(' ').collect();
-    if builtins(components) {
+    if builtins(&components) {
         return;
     }
 }
 
-fn builtins(command: Vec<&str>) -> bool {
+fn builtins(command: &Vec<&str>) -> bool {
     match command[0] {
         "cd" => cd(command),
         "pwd" => pwd(),
         _ => return false,
     }
-    return true;
+    true
 }
 
-fn cd(command: Vec<&str>) {
+fn cd(command: &Vec<&str>) {
     // cd is the "change directory" command. It can take either 0 or 1
     // arguments. If given no arguments, then the $HOME directory is
     // chosen.
@@ -82,7 +82,7 @@ fn cd(command: Vec<&str>) {
         Err(err) => {
             println_stderr!("cd: {}: {}", directory.display(), err);
         },
-        _ => (),
+        _ => {},
     }
 }
 
