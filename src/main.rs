@@ -1,19 +1,9 @@
 // Author: Alex Chernyakhovsky (achernya@mit.edu)
 
-// TODO(achernya): Per the documentation on doc.rust-lang.org, std::io
-// is not yet ready, so use old_io until 1.0-final.
-#![feature(old_io)]
-
-// std::env contains a lot of nice functions that otherwise would
-// require std::os to use; std::os has lots of deprecated functions.
-#![feature(env)]
-
-// TODO(achernya): Remove this feature when std::env moves over to
-// std::path.
-#![feature(old_path)]
-
 use std::env;
-use std::old_io as io;
+use std::io;
+use std::path::PathBuf;
+use std::io::Write;
 
 // println_stderr is like println, but to stderr.
 macro_rules! println_stderr(
@@ -34,12 +24,12 @@ trait ShellCommand {
 }
 
 fn shell_loop() {
-    let mut stdin = io::stdin();
     loop {
         print!("$ ");
-        let line = stdin.read_line();
-        match line {
-            Ok(expr) => handle_command(&expr),
+        io::stdout().flush().ok().expect("Could not flush stdout");
+        let mut line = String::new();
+        match io::stdin().read_line(&mut line) {
+            Ok(_) => handle_command(&line),
             Err(_) => break,
         }
     }
@@ -67,10 +57,10 @@ fn cd(command: &Vec<&str>) {
     // cd is the "change directory" command. It can take either 0 or 1
     // arguments. If given no arguments, then the $HOME directory is
     // chosen.
-    let dir: Option<Path> = match command.len() {
+    let dir: Option<PathBuf> = match command.len() {
         0 => panic!("invalid cd invocation"),
         1 => env::home_dir(),
-        _ => Some(Path::new(command[1]))
+        _ => Some(PathBuf::from(command[1]))
     };
     if dir.is_none() {
         println_stderr!("cd: no directory to change to");
@@ -87,7 +77,7 @@ fn cd(command: &Vec<&str>) {
 }
 
 fn pwd() {
-    let p = env::current_dir().unwrap_or(Path::new("/"));
+    let p = env::current_dir().unwrap_or(PathBuf::from("/"));
     println!("{}", p.display());
 }
 
